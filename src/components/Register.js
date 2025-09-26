@@ -9,6 +9,7 @@ export default function Register({ onLogin }) {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
+  const [success, setSuccess] = useState('');
 
   const navigate = useNavigate();
 
@@ -21,7 +22,7 @@ export default function Register({ onLogin }) {
         password
       });
       console.log(res.data);
-      onLogin(); // Redirect to login page
+      setSuccess('Registered Successfully');
     } catch (err) {
       console.error(err);
       setError('Registration failed. Try again.');
@@ -32,6 +33,7 @@ export default function Register({ onLogin }) {
     <div>
       <h2>Register</h2>
       {error && <p style={{ color: 'red' }}>{error}</p>}
+      {success && <p style={{ color: 'green' }}>{success}</p>}
       <input placeholder="Name" value={name} onChange={e => setName(e.target.value)} />
       <input placeholder="E-mail" value={email} onChange={e => setEmail(e.target.value)} />
       <input placeholder="Username" value={username} onChange={e => setUsername(e.target.value)} />
