@@ -76,20 +76,36 @@ export default function FriendsList() {
   }, [loading, hasMore, lastId]);
 
   return (
-    <div>
-      <h2>Friends {sender_id}</h2>
-      <button onClick={handleLogout}>Logout</button>
-      <ul>
-        {friends.map(user => (
-          <li key={user.id}>
-            <Link to={`/message/${user.id}`}>
-              {user.username}
-            </Link>
-          </li>
-        ))}
-      </ul>
-      {loading && <p>Loading more friends...</p>}
-      {!hasMore && <p>No more friends to load.</p>}
-    </div>
+<div className="max-w-md mx-auto p-4 bg-white shadow rounded-lg">
+  <div className="flex justify-between items-center mb-4">
+    <h2 className="text-xl font-bold">Friends {sender_id}</h2>
+    <button 
+      onClick={handleLogout} 
+      className="px-3 py-1 bg-red-500 text-white rounded hover:bg-red-600"
+    >
+      Logout
+    </button>
+  </div>
+
+  <ul className="space-y-2">
+    {friends.map(user => (
+      <li key={user.id}>
+        <Link 
+          to={`/message/${user.id}`} 
+          className="block px-3 py-2 rounded bg-gray-100 hover:bg-gray-200"
+        >
+          {user.username}
+        </Link>
+      </li>
+    ))}
+  </ul>
+
+  {loading && (
+    <p className="text-blue-500 text-sm mt-4">Loading more friends...</p>
+  )}
+  {!hasMore && (
+    <p className="text-gray-400 text-sm mt-4">No more friends to load.</p>
+  )}
+</div>
   );
 }
