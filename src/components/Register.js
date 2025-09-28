@@ -30,16 +30,58 @@ export default function Register({ onLogin }) {
   };
 
   return (
-    <div>
-      <h2>Register</h2>
-      {error && <p style={{ color: 'red' }}>{error}</p>}
-      {success && <p style={{ color: 'green' }}>{success}</p>}
-      <input placeholder="Name" value={name} onChange={e => setName(e.target.value)} />
-      <input placeholder="E-mail" value={email} onChange={e => setEmail(e.target.value)} />
-      <input placeholder="Username" value={username} onChange={e => setUsername(e.target.value)} />
-      <input placeholder="Password" type="password" value={password} onChange={e => setPassword(e.target.value)} />
-      <button onClick={handleRegister}>Register</button>
-      <button onClick={() => navigate("/")}>Back to Login</button>
+<div className="flex min-h-screen items-center justify-center bg-gray-100">
+  <div className="w-full max-w-md bg-white rounded-2xl shadow-lg p-8">
+    <h2 className="text-2xl font-bold text-center text-gray-800 mb-6">Register</h2>
+
+    {error && <p className="text-red-500 text-center mb-2">{error}</p>}
+    {success && <p className="text-green-500 text-center mb-2">{success}</p>}
+
+    <input
+      placeholder="Name"
+      value={name}
+      onChange={(e) => setName(e.target.value)}
+      className="w-full mb-3 px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-400"
+    />
+
+    <input
+      placeholder="E-mail"
+      value={email}
+      onChange={(e) => setEmail(e.target.value)}
+      className="w-full mb-3 px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-400"
+    />
+
+    <input
+      placeholder="Username"
+      value={username}
+      onChange={(e) => setUsername(e.target.value)}
+      className="w-full mb-3 px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-400"
+    />
+
+    <input
+      type="password"
+      placeholder="Password"
+      value={password}
+      onChange={(e) => setPassword(e.target.value)}
+      className="w-full mb-5 px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-400"
+    />
+
+    <div className="flex justify-between">
+      <button
+        onClick={handleRegister}
+        className="w-[48%] bg-indigo-600 text-white py-2 rounded-lg hover:bg-indigo-700 transition"
+      >
+        Register
+      </button>
+      <button
+        onClick={() => navigate("/")}
+        className="w-[48%] bg-gray-200 text-gray-800 py-2 rounded-lg hover:bg-gray-300 transition"
+      >
+        Back to Login
+      </button>
     </div>
+  </div>
+</div>
+
   );
 }

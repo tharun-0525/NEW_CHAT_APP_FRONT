@@ -47,6 +47,7 @@ export default function Chat() {
     setMessages(prev => {
       if (prev.some(m => m.id === msg.id)) return prev;
       const combined = [...prev, ...[msg]]; // add new msg
+      console.log(combined);
       return combined;
     });
     //console.log(msg);
