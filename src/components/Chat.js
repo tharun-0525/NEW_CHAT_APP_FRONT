@@ -28,7 +28,6 @@ export default function Chat() {
     fetchMessages();
   }, [friendId, token]);
 
-
   useEffect(() => {
     const token = localStorage.getItem("token");
     const ws = new WebSocket(`${API_WS_URL}/ws/send?user_id=${friendId}&token=${token}`);
@@ -53,7 +52,11 @@ export default function Chat() {
     //console.log(msg);
   };
 
-    ws.onclose = () => console.log("❌ WebSocket closed");
+    ws.onclose = (event) => {
+      console.warn(
+    `❌ WebSocket closed (code: ${event.code}, reason: ${event.reason || "no reason"}, wasClean: ${event.wasClean})`
+    );
+    }
     ws.onerror = (err) => console.error("⚠️ WebSocket error", err);
 
     setSocket(ws);
