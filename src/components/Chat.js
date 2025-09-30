@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { jwtDecode } from "jwt-decode";
 import axios from "axios";
@@ -13,6 +13,7 @@ export default function Chat() {
   const token = localStorage.getItem("token");
   const senderId = jwtDecode(token).user_id;
   const navigate = useNavigate();
+  const bottomRef = useRef(null);
 
   useEffect(() => {
     const fetchMessages = async () => {
@@ -20,7 +21,7 @@ export default function Chat() {
         const res = await axios.get(`${API_URL}/messages/${friendId}`, {
           headers: { Authorization: `Bearer ${token}` }
         });
-        setMessages(res.data);
+        setMessages(res.data.reverse());
       } catch (err) {
         console.error("Error fetching messages:", err);
       }
@@ -72,6 +73,10 @@ export default function Chat() {
     }
   };
 
+  useEffect(() => {
+    bottomRef.current?.scrollIntoView({ behavior: "smooth" });
+  }, [messages]);
+
   return (
    <div>
       {/* 🔙 Back Button */}
@@ -95,23 +100,26 @@ export default function Chat() {
               key={msg.id}
               style={{
                 textAlign: isMine ? "right" : "left",
-                backgroundColor: isMine ? "#DCF8C6" : "#FFF",
+                backgroundColor: isMine ? "#a3f266ff" : "#0e8fe6ff",
                 padding: "5px 10px",
                 borderRadius: "10px",
                 margin: "5px",
-                maxWidth: "70%",
+                maxWidth: "60%",
                 alignSelf: isMine ? "flex-end" : "flex-start",
               }}
             >
               {msg.content}
+            
             </div>
           );
         })}
+        <div ref={bottomRef} />
       </div>
 
       <input
         value={input}
         onChange={(e) => setInput(e.target.value)}
+        onKeyDown={(e) => { if (e.key === 'Enter') sendMessage(); }}
         placeholder="Type a message..."
       />
       <button onClick={sendMessage}>Send</button>
