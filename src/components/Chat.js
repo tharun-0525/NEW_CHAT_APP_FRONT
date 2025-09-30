@@ -4,6 +4,7 @@ import { jwtDecode } from "jwt-decode";
 import axios from "axios";
 const API_URL = process.env.REACT_APP_API_URL;
 const API_WS_URL = process.env.REACT_APP_WS_URL;
+const limit = 13;
 
 export default function Chat() {
   const {friendId} = useParams();
@@ -14,20 +15,43 @@ export default function Chat() {
   const senderId = jwtDecode(token).user_id;
   const navigate = useNavigate();
   const bottomRef = useRef(null);
+  const chatBoxRef = useRef(null);
+  const [offset, setOffset] = useState(0);
+  const [loading, setLoading] = useState(false);
+  const [hasMore, setHasMore] = useState(true);
 
-  useEffect(() => {
     const fetchMessages = async () => {
+      if (!hasMore || loading) return;
+      setLoading(true);
+
+      const chatDiv = chatBoxRef.current;
+      const prevHeight = chatDiv?.scrollHeight || 0;
+
       try {
         const res = await axios.get(`${API_URL}/messages/${friendId}`, {
+          params: { after_id: offset, limit: limit },
           headers: { Authorization: `Bearer ${token}` }
         });
-        setMessages(res.data.reverse());
+        if(res.data.length === 0) {
+          setHasMore(false);
+        }
+        else if (res.data.length < limit) {
+          setHasMore(false);
+        }
+        else{
+          setMessages(prev => {
+            const newOnes = res.data.filter(m => !prev.some(p => p.id === m.id));
+            return [...newOnes.reverse(), ...prev];
+          });
+          setOffset(prev => prev + limit);
+
+        if (chatDiv) chatDiv.scrollTop = chatDiv.scrollHeight - prevHeight;
+        }
       } catch (err) {
         console.error("Error fetching messages:", err);
       }
+      setLoading(false);
     };
-    fetchMessages();
-  }, [friendId, token]);
 
   useEffect(() => {
     const token = localStorage.getItem("token");
@@ -46,11 +70,14 @@ export default function Chat() {
       };
     setMessages(prev => {
       if (prev.some(m => m.id === msg.id)) return prev;
-      const combined = [...prev, ...[msg]]; // add new msg
+      const combined = [...prev, ...[msg]];
       console.log(combined);
       return combined;
     });
     //console.log(msg);
+    setTimeout(() => {
+    bottomRef.current?.scrollIntoView({ behavior: "smooth" });
+    }, 0);
   };
 
     ws.onclose = (event) => {
@@ -74,11 +101,21 @@ export default function Chat() {
   };
 
   useEffect(() => {
-    bottomRef.current?.scrollIntoView({ behavior: "smooth" });
-  }, [messages]);
+    console.log("Fetching messages...");
+    fetchMessages();
+    // eslint-disable-next-line
+  }, []);
+
+    //useEffect(() => {
+    //  bottomRef.current?.scrollIntoView({ behavior: "smooth" });
+    //}, [messages]);
+
+  const handleScroll = () => {
+    if (chatBoxRef.current.scrollTop === 0) fetchMessages();
+  };
 
   return (
-   <div>
+    <div>
       {/* 🔙 Back Button */}
       <button onClick={() => navigate(-1)} style={{ marginBottom: "10px" }}>
         ⬅ Back
@@ -86,27 +123,21 @@ export default function Chat() {
 
       <h2>Chat with Friend {friendId}</h2>
       <div
-        style={{
-          border: "1px solid #ccc",
-          padding: "10px",
-          height: "500px",
-          overflowY: "auto",
-        }}
-      >
+  ref={chatBoxRef}
+  onScroll={handleScroll}
+  className="w-full max-w-4xl h-[500px] flex flex-col space-y-2 p-4 border rounded-lg bg-white shadow-md overflow-y-auto mx-auto"
+>
         {messages.map((msg) => {
           const isMine = msg.sender_id === senderId;
           return (
             <div
               key={msg.id}
-              style={{
-                textAlign: isMine ? "right" : "left",
-                backgroundColor: isMine ? "#a3f266ff" : "#0e8fe6ff",
-                padding: "5px 10px",
-                borderRadius: "10px",
-                margin: "5px",
-                maxWidth: "60%",
-                alignSelf: isMine ? "flex-end" : "flex-start",
-              }}
+              className={`mb-2 px-6 py-3 rounded-2xl text-sm shadow-sm break-words ${
+                isMine
+                  ? "ml-auto bg-green-400 text-white text-right"
+                  : "mr-auto bg-blue-500 text-white text-left"
+              }`}
+              style={{ maxWidth: "70%" }}
             >
               {msg.content}
             
@@ -115,14 +146,18 @@ export default function Chat() {
         })}
         <div ref={bottomRef} />
       </div>
-
-      <input
-        value={input}
-        onChange={(e) => setInput(e.target.value)}
-        onKeyDown={(e) => { if (e.key === 'Enter') sendMessage(); }}
-        placeholder="Type a message..."
-      />
-      <button onClick={sendMessage}>Send</button>
+      <div className="flex items-center mt-4 space-x-2 w-full max-w-4xl mx-auto">
+        <input
+          value={input}
+          onChange={(e) => setInput(e.target.value)}
+          onKeyDown={(e) => { if (e.key === 'Enter') sendMessage(); }}
+          placeholder="Type a message..."
+          className="flex-1 px-4 py-2 border rounded-full shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-400"
+        />
+        <button onClick={sendMessage}  
+        className="px-4 py-2 bg-blue-500 text-white rounded-full hover:bg-blue-600 shadow-sm">
+        Send</button>
+      </div>
     </div>
   );
 }
