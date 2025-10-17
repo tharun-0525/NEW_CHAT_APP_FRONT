@@ -9,7 +9,7 @@ export default function FriendsList() {
   const [friends, setFriends] = useState([]);
   const [loading, setLoading] = useState(false);
   const [hasMore, setHasMore] = useState(true);
-  const [lastId, setLastId] = useState(null);
+  const [lastId, setLastId] = useState(0);
   const chatBoxRef = useRef(null);
   const BottomRef = useRef(null);
 
@@ -31,13 +31,19 @@ export default function FriendsList() {
     const prevHeight = chatDiv.scrollHeight || 0;
 
     try {
-      const res = await axios.get(
+      const ress = await axios.get(
         `${API_URL}/users`, 
         {
         params: { after_id: lastId, limit: limit }, 
         headers: { Authorization: `Bearer ${token}` }
         }
       );
+      console.log("Fetched users:", ress.data);
+      const res = Array.isArray(ress.data) ? ress : [];
+      console.log("Fetched users response:", res.data);
+      setLastId(res.data[res.data.length - 1].id);
+      console.log("Last ID:", res.data[res.data.length - 1].id);
+      console.log("lastId state:", lastId);
       if (res.data.length === 0) {
         setHasMore(false);
       } 
@@ -47,24 +53,20 @@ export default function FriendsList() {
         }
         setFriends(prevFriends => {
       // Filter out duplicates before appending
-        console.log("Fetched users:", res.data);
         const newFriends = res.data.filter(
           user => !prevFriends.some(f => f.id === user.id)
         );
         return [...prevFriends, ...newFriends];
         });
-        setLastId(res.data[res.data.length-1].id || lastId);
       }
-      
-      console.log("lastId",lastId); 
-
-    if (chatDiv) chatDiv.scrollTop = chatDiv.scrollHeight - prevHeight;
+      if (chatDiv) chatDiv.scrollTop = chatDiv.scrollHeight - prevHeight;
     } 
     catch (err) {
       console.error("Error fetching users:", err);
     } 
     finally {
       setLoading(false);
+      console.log("Last ID after fetch:", lastId);
     }
   };
 
