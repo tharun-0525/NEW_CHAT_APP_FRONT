@@ -3,7 +3,7 @@ import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 const API_URL = process.env.REACT_APP_API_URL;
 
-export default function Register({ onLogin }) {
+export default function Register() {
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [username, setUsername] = useState('');
@@ -14,6 +14,8 @@ export default function Register({ onLogin }) {
   const navigate = useNavigate();
 
   const handleRegister = async () => {
+    setError('');
+    setSuccess('');
     try {
       const res = await axios.post(`${API_URL}/auth/register`, {
         name,
@@ -23,9 +25,17 @@ export default function Register({ onLogin }) {
       });
       console.log(res.data);
       setSuccess('Registered Successfully');
-    } catch (err) {
+      navigate("/register");
+      setName('');
+      setEmail('');
+      setUsername('');
+      setPassword('');
+    } 
+    catch (err) {
       console.error(err);
-      setError('Registration failed. Try again.');
+      const obj=err.response?.data.detail[0].loc[1] || "error"
+      const msg=err.response?.data.detail[0].msg || "Something went wrong"
+      setError( `${obj}:${msg}`);
     }
   };
 
@@ -45,16 +55,16 @@ export default function Register({ onLogin }) {
     />
 
     <input
-      placeholder="E-mail"
-      value={email}
-      onChange={(e) => setEmail(e.target.value)}
+      placeholder="Username"
+      value={username}
+      onChange={(e) => setUsername(e.target.value)}
       className="w-full mb-3 px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-400"
     />
 
     <input
-      placeholder="Username"
-      value={username}
-      onChange={(e) => setUsername(e.target.value)}
+      placeholder="E-mail"
+      value={email}
+      onChange={(e) => setEmail(e.target.value)}
       className="w-full mb-3 px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-400"
     />
 
