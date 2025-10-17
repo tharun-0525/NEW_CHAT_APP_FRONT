@@ -8,7 +8,7 @@ const limit = 10;
 export default function FriendsList() {
   const [friends, setFriends] = useState([]);
   const [loading, setLoading] = useState(false);
-  const [hasMore, setHasMore] = useState(true);
+  const [hasMore, setHasMore] = useRef(true);
   const [lastId, setLastId] = useState(0);
   const chatBoxRef = useRef(null);
   const BottomRef = useRef(null);
@@ -24,7 +24,7 @@ export default function FriendsList() {
   }
 
   const fetchFriends = async () => {
-    if (!hasMore){ 
+    if (loading || !hasMore){ 
       console.log("no more to fetch");
       return;
     }
@@ -49,7 +49,7 @@ export default function FriendsList() {
       console.log("Last ID:", res.data[res.data.length - 1].id);
       console.log("lastId state:", lastId);
       if (res.data.length === 0) {
-        setHasMore(false);
+        setHasMore.current(false);
       } 
       else {
         if (res.data.length < limit) {
