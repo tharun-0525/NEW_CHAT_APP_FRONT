@@ -24,7 +24,10 @@ export default function FriendsList() {
   }
 
   const fetchFriends = async () => {
-    if (loading || !hasMore) return;
+    if (!hasMore){ 
+      console.log("no more to fetch");
+      return;
+    }
     setLoading(true);
 
     const chatDiv = chatBoxRef.current;
@@ -40,6 +43,7 @@ export default function FriendsList() {
       );
       console.log("Fetched users:", ress.data);
       const res = Array.isArray(ress.data) ? ress : [];
+
       console.log("Fetched users response:", res.data);
       setLastId(res.data[res.data.length - 1].id);
       console.log("Last ID:", res.data[res.data.length - 1].id);
