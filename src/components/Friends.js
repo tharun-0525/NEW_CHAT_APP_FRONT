@@ -8,7 +8,7 @@ const limit = 10;
 export default function FriendsList() {
   const [friends, setFriends] = useState([]);
   const [loading, setLoading] = useState(false);
-  const [hasMore, setHasMore] = useRef(true);
+  const [hasMore, setHasMore] = useState(true);
   const [lastId, setLastId] = useState(0);
   const chatBoxRef = useRef(null);
   const BottomRef = useRef(null);
@@ -49,7 +49,7 @@ export default function FriendsList() {
       console.log("Last ID:", res.data[res.data.length - 1].id);
       console.log("lastId state:", lastId);
       if (res.data.length === 0) {
-        setHasMore.current(false);
+        setHasMore(false);
       } 
       else {
         if (res.data.length < limit) {
