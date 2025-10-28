@@ -28,25 +28,28 @@ export default function Chat() {
       const prevHeight = chatDiv?.scrollHeight || 0;
 
       try {
-        const res = await axios.get(`${API_URL}/messages/${friendId}`, {
+        const ress = await axios.get(`${API_URL}/messages/${friendId}`, {
           params: { after_id: offset, limit: limit },
           headers: { Authorization: `Bearer ${token}` }
         });
-        if(res.data.length === 0) {
+        const res=ress.data;
+        console.log("API Response:", res);
+
+        if(res.status !== "success") {
+          setHasMore(false);
+          return;
+
+        }
+        if (res.data.length < limit) {
           setHasMore(false);
         }
-        else if (res.data.length < limit) {
-          setHasMore(false);
-        }
-        else{
-          setMessages(prev => {
-            const newOnes = res.data.filter(m => !prev.some(p => p.id === m.id));
-            return [...newOnes.reverse(), ...prev];
-          });
-          setOffset(prev => prev + limit);
+        setMessages(prev => {
+          const newOnes = res.data.filter(m => !prev.some(p => p.id === m.id));
+          return [...newOnes.reverse(), ...prev];
+        });
+        setOffset(prev => prev + limit);
 
         if (chatDiv) chatDiv.scrollTop = chatDiv.scrollHeight - prevHeight;
-        }
       } catch (err) {
         console.error("Error fetching messages:", err);
       }

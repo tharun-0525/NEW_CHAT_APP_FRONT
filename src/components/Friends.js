@@ -41,28 +41,28 @@ export default function FriendsList() {
         headers: { Authorization: `Bearer ${token}` }
         }
       );
-      console.log("Fetched users:", ress.data);
-      const res = Array.isArray(ress.data) ? ress : [];
+      const res=ress.data;
+      console.log("API Response:", res);
 
-      console.log("Fetched users response:", res.data);
+      if (res.status !== "success" ){
+        return null;
+      }
+
+      console.log("Fetched users:", res.data);
+
       setLastId(res.data[res.data.length - 1].id);
       console.log("Last ID:", res.data[res.data.length - 1].id);
       console.log("lastId state:", lastId);
-      if (res.data.length === 0) {
+      if (res.data.length < limit) {
         setHasMore(false);
-      } 
-      else {
-        if (res.data.length < limit) {
-          setHasMore(false);
-        }
-        setFriends(prevFriends => {
-      // Filter out duplicates before appending
-        const newFriends = res.data.filter(
-          user => !prevFriends.some(f => f.id === user.id)
-        );
-        return [...prevFriends, ...newFriends];
-        });
       }
+      setFriends(prevFriends => {
+    // Filter out duplicates before appending
+      const newFriends = res.data.filter(
+        user => !prevFriends.some(f => f.id === user.id)
+      );
+      return [...prevFriends, ...newFriends];
+      });
       if (chatDiv) chatDiv.scrollTop = chatDiv.scrollHeight - prevHeight;
     } 
     catch (err) {
