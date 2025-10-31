@@ -19,6 +19,7 @@ export default function Chat() {
   const [offset, setOffset] = useState(0);
   const [loading, setLoading] = useState(false);
   const [hasMore, setHasMore] = useState(true);
+  const wsRef = useRef(null);
 
     const fetchMessages = async () => {
       if (!hasMore || loading) return;
@@ -58,12 +59,14 @@ export default function Chat() {
 
   useEffect(() => {
     const token = localStorage.getItem("token");
-    const ws = new WebSocket(`${API_WS_URL}/ws/send?user_id=${friendId}&token=${token}`);
+    wsRef.current = new WebSocket(`${API_WS_URL}/ws/send?user_id=${friendId}&token=${token}`);
 
-    ws.onopen = () => console.log("✅ Connected to WebSocket");
+    wsRef.current.onopen = () => console.log("✅ Connected to WebSocket");
     
-    ws.onmessage = (event) => {
+    wsRef.current.onmessage = (event) => {
       const data = JSON.parse(event.data);
+      console.log("WebSocket message received:", data);
+      if (data.message === "ping") return;
       const msg = {
         receiver_id: data.receiver_id,
         content: data.content,
@@ -74,7 +77,6 @@ export default function Chat() {
     setMessages(prev => {
       if (prev.some(m => m.id === msg.id)) return prev;
       const combined = [...prev, ...[msg]];
-      console.log(combined);
       return combined;
     });
     //console.log(msg);
@@ -83,23 +85,30 @@ export default function Chat() {
     }, 0);
   };
 
-    ws.onclose = (event) => {
+    wsRef.current.onclose = (event) => {
       console.warn(
     `❌ WebSocket closed (code: ${event.code}, reason: ${event.reason || "no reason"}, wasClean: ${event.wasClean})`
     );
     }
-    ws.onerror = (err) => console.error("⚠️ WebSocket error", err);
+    wsRef.current.onerror = (err) => console.error("⚠️ WebSocket error", err);
 
-    setSocket(ws);
+    setSocket(wsRef.current);
 
     return () => {
     };
   }, [friendId]);
 
+  const scrollToBottom = (ref) => {
+  if (ref?.current) {
+    ref.current.scrollIntoView({ behavior: "smooth" });
+  }
+};
+
   const sendMessage = () => {
     if (socket && input.trim() !== "") {
       socket.send(JSON.stringify({ sender_id: jwtDecode(localStorage.getItem("token")).user_id, receiver_id: friendId ,content: input}));
       setInput("");
+      scrollToBottom(bottomRef);
     }
   };
 
@@ -120,7 +129,7 @@ export default function Chat() {
   return (
     <div>
       {/* 🔙 Back Button */}
-      <button onClick={() => navigate(-1)} style={{ marginBottom: "10px" }}>
+      <button onClick={() => {wsRef.current.close();navigate(-1);}} style={{ marginBottom: "10px" }}>
         ⬅ Back
       </button>
 

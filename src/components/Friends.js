@@ -37,7 +37,7 @@ export default function FriendsList() {
       const ress = await axios.get(
         `${API_URL}/users`, 
         {
-        params: { after_id: lastId, limit: limit }, 
+        params: { offset: lastId, limit: limit }, 
         headers: { Authorization: `Bearer ${token}` }
         }
       );
